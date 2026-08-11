@@ -1,0 +1,27 @@
+{
+  "name": "koan",
+  "private": true,
+  "packageManager": "pnpm@10.27.0",
+  "engines": {
+    "node": ">=22.22.0",
+    "pnpm": ">=10.0.0",
+    "deno": ">=2.9.0"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "concurrently -n web,gateway -c blue,green \"pnpm --filter @koan/web dev\" \"pnpm --filter @koan/gateway dev\"",
+    "dev:web": "pnpm --filter @koan/web dev",
+    "dev:gateway": "pnpm --filter @koan/gateway dev",
+    "build": "pnpm --filter @koan/protocol check && pnpm --filter @koan/web build && pnpm --filter @koan/gateway check",
+    "start": "node scripts/start.mjs",
+    "lint": "pnpm -r lint",
+    "test": "node --test scripts/*.test.mjs && pnpm -r test",
+    "test:e2e": "pnpm --filter @koan/web test:e2e",
+    "test:agents": "KOAN_AGENT_SMOKE=1 deno test --allow-run --allow-env apps/gateway/tests/agent_smoke_test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "concurrently": "^9.2.1"
+  },
+  "workspaces": ["apps/*", "packages/*"]
+}

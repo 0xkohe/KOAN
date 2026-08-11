@@ -1,0 +1,12 @@
+node_modules/
+.pnpm-store/
+.koan/
+.env.koan
+apps/web/build/
+apps/web/dist/
+apps/web/.react-router/
+.playwright-cli/
+playwright-report/
+test-results/
+*.log
+.DS_Store
