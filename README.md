@@ -21,10 +21,10 @@ pnpm start
 
 `pnpm run setup` creates `.env.koan`. Edit `KOAN_ALLOWED_ROOTS` there before starting if your repositories are outside this directory. Separate multiple absolute roots with `:` on Linux/macOS. (`pnpm setup` without `run` is pnpm's own shell-setup command.)
 
-The Gateway listens only on `127.0.0.1:8787`. Publish it inside your tailnet with:
+The Gateway listens only on `127.0.0.1:18787`. Publish it inside your tailnet with:
 
 ```bash
-tailscale serve --bg localhost:8787
+tailscale serve --bg localhost:18787
 ```
 
 Open the resulting `https://<machine>.<tailnet>.ts.net/` URL on the phone and enter the single-use 8-digit code printed by `pnpm start`. The cookie is Secure and therefore pairing through plain HTTP is intentionally unsupported in production.
@@ -33,12 +33,30 @@ For local UI development, use `pnpm dev`; the development Gateway allows an inse
 
 ## Architecture
 
-```text
-Phone PWA ── HTTPS/WSS over Tailscale ── Deno Gateway (127.0.0.1:8787)
-                                               ├─ SQLite history
-                                               ├─ React SPA
-                                               └─ local agent CLIs
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"system-ui, sans-serif","primaryColor":"#e8f1ff","primaryTextColor":"#172033","primaryBorderColor":"#6b9ee8","lineColor":"#718096","secondaryColor":"#f5f7fa","tertiaryColor":"#fff4dd"},"flowchart":{"curve":"basis"}}}%%
+flowchart LR
+    user([User]) --> phone[Phone PWA]
+    phone <-->|HTTPS / WSS<br/>over Tailscale| gateway[Deno Gateway<br/>127.0.0.1:18787]
+
+    gateway --> store[(SQLite<br/>history and state)]
+    gateway --> queue[Per-project<br/>FIFO scheduler]
+    gateway --> files[(Local<br/>attachments)]
+    queue --> adapter[Agent adapters]
+    adapter --> agents[Codex / Claude<br/>Kiro / Cline / OpenCode]
+    agents <--> project[(Allowed<br/>project files)]
+
+    classDef client fill:#e8f1ff,stroke:#4b82d0,color:#172033,stroke-width:1.5px;
+    classDef core fill:#fff4dd,stroke:#d99a2b,color:#352713,stroke-width:1.5px;
+    classDef data fill:#f1edff,stroke:#816ac5,color:#211b33,stroke-width:1.5px;
+    classDef agent fill:#e8f7ef,stroke:#41966a,color:#163326,stroke-width:1.5px;
+    class user,phone client;
+    class gateway,queue core;
+    class store,files,project data;
+    class adapter,agents agent;
 ```
+
+See [the detailed service architecture and request flow](docs/SERVICE_ARCHITECTURE.md) for Mermaid diagrams.
 
 The frontend uses React Router Framework Mode with `ssr: false`. `app/routes.ts` contains only `flatRoutes()`; route filenames are the sole source for page nesting and URL paths.
 

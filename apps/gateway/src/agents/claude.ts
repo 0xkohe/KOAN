@@ -1,5 +1,11 @@
-import { type PermissionUpdate, query, type SDKMessage } from "@anthropic-ai/claude-agent-sdk";
-import type { AgentAdapter, RunContext } from "./types.ts";
+import {
+  type PermissionUpdate,
+  query,
+  type SDKMessage,
+  type SDKUserMessage,
+} from "@anthropic-ai/claude-agent-sdk";
+import type { AgentModelOption } from "../../../../packages/protocol/src/index.ts";
+import { type AgentAdapter, type RunContext, withTimeout } from "./types.ts";
 
 const automaticReadTools = new Set(["Read", "Glob", "Grep", "WebFetch", "WebSearch", "TodoRead"]);
 
@@ -9,6 +15,31 @@ export class ClaudeAdapter implements AgentAdapter {
   capabilities = { approvals: true, attachments: true, resume: true, models: true };
 
   constructor(private queryFactory: typeof query = query) {}
+
+  async models(cwd: string): Promise<AgentModelOption[]> {
+    const stream = this.queryFactory({
+      prompt: idlePrompt(),
+      options: {
+        cwd,
+        permissionMode: "default",
+        settingSources: ["user", "project", "local"],
+      },
+    });
+    try {
+      const models = await withTimeout(
+        stream.supportedModels(),
+        10_000,
+        "Claude model discovery timed out",
+      );
+      return models.map((model) => ({
+        id: model.value,
+        label: model.displayName,
+        ...(model.description ? { description: model.description } : {}),
+      }));
+    } finally {
+      stream.close();
+    }
+  }
 
   async run(context: RunContext): Promise<void> {
     const attachmentNote = context.attachments.length
@@ -164,6 +195,14 @@ export class ClaudeAdapter implements AgentAdapter {
       },
     };
   }
+}
+
+function idlePrompt(): AsyncIterable<SDKUserMessage> {
+  return {
+    [Symbol.asyncIterator]: () => ({
+      next: () => new Promise<IteratorResult<SDKUserMessage>>(() => {}),
+    }),
+  };
 }
 
 export function claudeApprovalOptions(canPersist: boolean) {

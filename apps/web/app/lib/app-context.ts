@@ -6,6 +6,7 @@ export type AppData = {
   projects: Project[];
   sessions: Session[];
   agents: AgentState[];
+  roots: string[];
 };
 export function useAppData() {
   return useOutletContext<AppData>();

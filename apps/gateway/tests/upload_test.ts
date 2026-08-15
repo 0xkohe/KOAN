@@ -51,7 +51,7 @@ Deno.test("failed attachment metadata insertion removes the uploaded file", asyn
   try {
     const config: GatewayConfig = {
       host: "127.0.0.1",
-      port: 8787,
+      port: 18787,
       dataDir: directory,
       webDir: directory,
       allowedRoots: [directory],
@@ -71,9 +71,9 @@ Deno.test("failed attachment metadata insertion removes the uploaded file", asyn
     form.set("file", new File(["hello"], "hello.txt", { type: "text/plain" }));
 
     const response = await server.handle(
-      new Request("http://127.0.0.1:8787/api/v1/attachments", {
+      new Request("http://127.0.0.1:18787/api/v1/attachments", {
         method: "POST",
-        headers: { origin: "http://127.0.0.1:8787", "x-koan-csrf": "1" },
+        headers: { origin: "http://127.0.0.1:18787", "x-koan-csrf": "1" },
         body: form,
       }),
     );
@@ -89,7 +89,7 @@ Deno.test("failed attachment metadata insertion removes the uploaded file", asyn
 Deno.test("pairing requests reject oversized streaming bodies", async () => {
   const config: GatewayConfig = {
     host: "127.0.0.1",
-    port: 8787,
+    port: 18787,
     dataDir: "/tmp",
     webDir: "/tmp",
     allowedRoots: ["/tmp"],
@@ -98,9 +98,9 @@ Deno.test("pairing requests reject oversized streaming bodies", async () => {
   };
   const server = new GatewayServer(config, {} as never, {} as never, {} as never, {} as never);
   const response = await server.handle(
-    new Request("http://127.0.0.1:8787/api/v1/auth/pair", {
+    new Request("http://127.0.0.1:18787/api/v1/auth/pair", {
       method: "POST",
-      headers: { "content-type": "application/json", origin: "http://127.0.0.1:8787" },
+      headers: { "content-type": "application/json", origin: "http://127.0.0.1:18787" },
       body: new ReadableStream({
         start(controller) {
           controller.enqueue(new Uint8Array(4097));

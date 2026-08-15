@@ -1,4 +1,4 @@
-import type { AgentState, Project } from "@koan/protocol";
+import type { AgentModelOption, AgentState, Project } from "@koan/protocol";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useRevalidator } from "react-router";
@@ -19,7 +19,11 @@ export function NewSessionDialog(
     agents.find((agent) => agent.available)?.id ?? "",
   );
   const [model, setModel] = useState("");
+  const [models, setModels] = useState<AgentModelOption[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState("");
   const [mode, setMode] = useState("");
+  const [approvalMode, setApprovalMode] = useState<"manual" | "auto">("manual");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
@@ -31,6 +35,33 @@ export function NewSessionDialog(
         : projects[0]?.id ?? ""
     );
   }, [projects]);
+  useEffect(() => {
+    if (open) setApprovalMode("manual");
+  }, [open]);
+  useEffect(() => {
+    setModel("");
+    setModels([]);
+    setModelsError("");
+    setModelsLoading(false);
+    if (!open || !agentId || !projectId) return;
+    let active = true;
+    setModelsLoading(true);
+    void api.agentModels(agentId as AgentState["id"], projectId).then(
+      ({ models: available }) => {
+        if (active) setModels(available);
+      },
+      (reason) => {
+        if (active) {
+          setModelsError(reason instanceof Error ? reason.message : String(reason));
+        }
+      },
+    ).finally(() => {
+      if (active) setModelsLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [open, agentId, projectId]);
   if (!open) return null;
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -44,6 +75,7 @@ export function NewSessionDialog(
         agentId,
         model,
         supportsMode ? mode : "",
+        approvalMode === "auto",
       );
       await revalidator.revalidate();
       onClose();
@@ -108,11 +140,25 @@ export function NewSessionDialog(
             <span>
               Model <small>(optional)</small>
             </span>
-            <input
+            <select
               value={model}
               onChange={(event) => setModel(event.target.value)}
-              placeholder="Agent default"
-            />
+              disabled={modelsLoading}
+            >
+              <option value="">
+                {modelsLoading ? "Loading models…" : "Agent default"}
+              </option>
+              {models.map((item) => (
+                <option value={item.id} key={item.id}>
+                  {item.label}{item.isDefault ? " — current default" : ""}
+                </option>
+              ))}
+            </select>
+            {modelsError && (
+              <small className="field-note">
+                Model list unavailable. The agent default will be used.
+              </small>
+            )}
           </label>
           {supportsMode && (
             <label className="field">
@@ -127,6 +173,20 @@ export function NewSessionDialog(
             </label>
           )}
         </div>
+        <label className="field">
+          <span>Approvals</span>
+          <select
+            value={approvalMode}
+            onChange={(event) =>
+              setApprovalMode(event.target.value as "manual" | "auto")}
+          >
+            <option value="manual">Ask every time</option>
+            <option value="auto">Auto-approve</option>
+          </select>
+          <small className="field-note">
+            Auto-approve allows tool and command requests without confirmation for this session.
+          </small>
+        </label>
         {error && <p className="error-text">{error}</p>}
         <button
           className="button-primary w-full"

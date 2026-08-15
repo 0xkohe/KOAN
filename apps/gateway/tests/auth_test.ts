@@ -19,7 +19,7 @@ Deno.test("pairing enforces every supplied rate-limit bucket", async () => {
   try {
     const config: GatewayConfig = {
       host: "127.0.0.1",
-      port: 8787,
+      port: 18787,
       dataDir: directory,
       webDir: directory,
       allowedRoots: [directory],

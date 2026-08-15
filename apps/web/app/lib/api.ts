@@ -1,4 +1,6 @@
 import type {
+  AgentId,
+  AgentModelOption,
   AgentState,
   Approval,
   ApprovalDecision,
@@ -74,6 +76,11 @@ export const api = {
   revokeDevice: (id: string) =>
     request(`/api/v1/devices/${id}`, { method: "DELETE" }),
   agents: () => request<{ agents: AgentState[] }>("/api/v1/agents"),
+  agentModels: (agentId: AgentId, projectId: string) =>
+    request<{ models: AgentModelOption[] }>(
+      `/api/v1/agents/${agentId}/models?projectId=${encodeURIComponent(projectId)}`,
+    ),
+  roots: () => request<{ roots: string[] }>("/api/v1/roots"),
   projects: () => request<{ projects: Project[] }>("/api/v1/projects"),
   project: (id: string) =>
     request<{ project: Project; sessions: Session[] }>(
@@ -108,6 +115,7 @@ export const api = {
     agentId: string,
     model?: string,
     mode?: string,
+    autoApprove = false,
   ) =>
     request<{ session: Session }>("/api/v1/sessions", {
       method: "POST",
@@ -116,6 +124,7 @@ export const api = {
         agentId,
         model: model || undefined,
         mode: mode || undefined,
+        autoApprove,
       },
     }),
   renameSession: (id: string, title: string) =>

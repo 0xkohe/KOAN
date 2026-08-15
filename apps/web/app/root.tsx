@@ -1,6 +1,7 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import { useEffect } from "react";
 import { registerSW } from "virtual:pwa-register";
+import { InstallPrompt } from "./components/install-prompt";
 import "./styles.css";
 import "./lib/i18n";
 
@@ -14,6 +15,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
         <meta name="theme-color" content="#f5f5f7" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="KOAN" />
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/icon-180.png" />
         <Meta />
         <Links />
       </head>
@@ -37,7 +44,12 @@ export default function App() {
           matchMedia("(prefers-color-scheme: dark)").matches,
     );
   }, []);
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <InstallPrompt />
+    </>
+  );
 }
 
 export function ErrorBoundary({ error }: { error: unknown }) {

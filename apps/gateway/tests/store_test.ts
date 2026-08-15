@@ -30,6 +30,23 @@ Deno.test("store locks a persistent data directory before recovery", () => {
   }
 });
 
+Deno.test("sessions persist auto-approve mode", () => {
+  const directory = Deno.makeTempDirSync({ dir: "/tmp", prefix: "koan-auto-approve-" });
+  try {
+    const store = new Store(directory);
+    const project = store.createProject("KOAN", directory);
+    const session = store.createSession(project.id, "codex", null, null, true);
+    assert.equal(store.getSessionWithProject(session.id)?.autoApprove, true);
+    store.close();
+
+    const reopened = new Store(directory);
+    assert.equal(reopened.getSessionWithProject(session.id)?.autoApprove, true);
+    reopened.close();
+  } finally {
+    Deno.removeSync(directory, { recursive: true });
+  }
+});
+
 Deno.test("events are durable and monotonically sequenced", () => {
   const directory = Deno.makeTempDirSync({ dir: "/tmp", prefix: "koan-store-" });
   try {
@@ -228,6 +245,37 @@ Deno.test("existing attachment tables gain the consumed timestamp column", () =>
     );
     assert.equal(store.cleanupDraftAttachments("2021-01-01T00:00:00.000Z"), 0);
     assert.ok(Deno.statSync(legacyPath).isFile);
+    store.close();
+  } finally {
+    Deno.removeSync(directory, { recursive: true });
+  }
+});
+
+Deno.test("existing session tables gain the auto-approve column safely disabled", () => {
+  const directory = Deno.makeTempDirSync({ dir: "/tmp", prefix: "koan-session-migration-" });
+  try {
+    const database = new DatabaseSync(join(directory, "koan.sqlite"));
+    database.exec(`
+      CREATE TABLE sessions (
+        id TEXT PRIMARY KEY, project_id TEXT NOT NULL, agent_id TEXT NOT NULL,
+        title TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'idle', model TEXT,
+        mode TEXT, agent_session_id TEXT, created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL, last_seq INTEGER NOT NULL DEFAULT 0,
+        archived_at TEXT
+      );
+    `);
+    database.close();
+
+    const store = new Store(directory);
+    const columns = store.db.prepare("PRAGMA table_info(sessions)").all() as Array<{ name: string }>;
+    assert.equal(columns.some((column) => column.name === "auto_approve"), true);
+    assert.equal(
+      (store.db.prepare("PRAGMA table_info(sessions)").all() as Array<{
+        name: string;
+        dflt_value: string | null;
+      }>).find((column) => column.name === "auto_approve")?.dflt_value,
+      "0",
+    );
     store.close();
   } finally {
     Deno.removeSync(directory, { recursive: true });

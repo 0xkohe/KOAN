@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { join } from "node:path";
-import type { AgentId, GatewayEvent } from "../../../packages/protocol/src/index.ts";
+import type { AgentId, ApprovalDecision, GatewayEvent } from "../../../packages/protocol/src/index.ts";
 import type { AgentAdapter, RunContext } from "../src/agents/types.ts";
 import { Store } from "../src/db.ts";
 import { Scheduler } from "../src/scheduler.ts";
@@ -467,6 +467,58 @@ Deno.test("scheduler publishes queued and approval-resolution status transitions
       events.filter((event) => event.sessionId === second.id && event.type === "session.status")
         .map((event) => event.payload.status),
       ["queued", "running", "waiting_approval", "running", "idle"],
+    );
+    store.close();
+  } finally {
+    Deno.removeSync(directory, { recursive: true });
+  }
+});
+
+Deno.test("auto-approve sessions choose a persistent allow option and keep an audit record", async () => {
+  const directory = Deno.makeTempDirSync({ dir: "/tmp", prefix: "koan-auto-approval-" });
+  try {
+    const store = new Store(directory);
+    const project = store.createProject("KOAN", directory);
+    const session = store.createSession(project.id, "codex", null, null, true);
+    let decision: ApprovalDecision | undefined;
+    const adapter: AgentAdapter = {
+      id: "codex",
+      command: "fake",
+      capabilities: { approvals: true, attachments: true, resume: true, models: true },
+      async run(context: RunContext) {
+        decision = await context.approve({
+          requestKey: "approval",
+          title: "Run command",
+          command: "npm test",
+          options: [
+            { id: "decline", label: "Deny", kind: "deny" },
+            { id: "accept", label: "Allow once", kind: "allow" },
+            { id: "acceptForSession", label: "Allow for session", kind: "allow" },
+          ],
+        });
+      },
+    };
+    const events: GatewayEvent[] = [];
+    const scheduler = new Scheduler(
+      store,
+      { adapter: () => adapter } as never,
+      (event) => events.push(event),
+      [directory],
+    );
+
+    scheduler.enqueue(session.id, "turn", { text: "approve", attachmentIds: [] });
+    await waitUntil(() => store.getSession(session.id)?.status === "idle");
+
+    assert.deepEqual(decision, { optionId: "acceptForSession", scope: "session" });
+    assert.equal(store.pendingApprovals(session.id).length, 0);
+    const approval = store.db.prepare(
+      "SELECT status,decision FROM approvals WHERE session_id=?",
+    ).get(session.id) as { status: string; decision: string };
+    assert.equal(approval.status, "approved");
+    assert.equal(approval.decision, "acceptForSession");
+    assert.equal(
+      events.some((event) => event.type === "approval.resolved" && event.payload.automatic === true),
+      true,
     );
     store.close();
   } finally {

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "KOAN_INSECURE_COOKIE=1 deno run --env-file=../../.env.koan --watch --allow-net=127.0.0.1:8787 --allow-read --allow-write --allow-run --allow-env --allow-sys=homedir,cpus,networkInterfaces src/main.ts",
+    "dev": "KOAN_INSECURE_COOKIE=1 deno run --env-file=../../.env.koan --watch --allow-net=127.0.0.1:18787 --allow-read --allow-write --allow-run --allow-env --allow-sys=homedir,cpus,networkInterfaces src/main.ts",
     "check": "deno check src/main.ts",
     "lint": "deno lint src tests",
     "test": "deno test --allow-read --allow-write --allow-run --allow-env --allow-sys=homedir tests"

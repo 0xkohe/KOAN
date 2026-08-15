@@ -123,7 +123,7 @@ Deno.test("diff revalidates a saved project path before invoking Git", async () 
     Deno.mkdirSync(outside);
     const config: GatewayConfig = {
       host: "127.0.0.1",
-      port: 8787,
+      port: 18787,
       dataDir: join(directory, "data"),
       webDir: directory,
       allowedRoots: [root],
@@ -146,7 +146,7 @@ Deno.test("diff revalidates a saved project path before invoking Git", async () 
     Deno.symlinkSync(outside, projectPath);
 
     const response = await server.handle(
-      new Request(`http://127.0.0.1:8787/api/v1/sessions/${session.id}/diff`, {
+      new Request(`http://127.0.0.1:18787/api/v1/sessions/${session.id}/diff`, {
         headers: { cookie: `koan_device=${token}` },
       }),
     );

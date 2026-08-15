@@ -85,7 +85,7 @@ for (
 const allowedCommands = [...new Set([...installedCommands, ...claudeSdkBinaries])].join(",");
 const args = [
   "run",
-  `--allow-net=127.0.0.1:${env.KOAN_PORT ?? "8787"}`,
+  `--allow-net=127.0.0.1:${env.KOAN_PORT ?? "18787"}`,
   `--allow-read=${readPaths}`,
   `--allow-write=${writePaths}`,
   `--allow-run=${allowedCommands}`,

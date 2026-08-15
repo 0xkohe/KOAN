@@ -1,5 +1,6 @@
 import { JsonLineRpc, type JsonObject } from "./json-lines.ts";
-import type { AgentAdapter, RunContext } from "./types.ts";
+import type { AgentModelOption } from "../../../../packages/protocol/src/index.ts";
+import { type AgentAdapter, type RunContext, withTimeout } from "./types.ts";
 
 export class AcpAdapter implements AgentAdapter {
   capabilities = { approvals: true, attachments: true, resume: true, models: true };
@@ -9,6 +10,27 @@ export class AcpAdapter implements AgentAdapter {
     public command: string,
     private args: string[],
   ) {}
+
+  async models(cwd: string): Promise<AgentModelOption[]> {
+    const rpc = new JsonLineRpc(this.command, this.args, cwd, { jsonRpcVersion: "2.0" });
+    try {
+      return await withTimeout(
+        (async () => {
+          await rpc.call("initialize", {
+            protocolVersion: 1,
+            clientCapabilities: { fs: { readTextFile: false, writeTextFile: false }, terminal: false },
+            clientInfo: { name: "KOAN", title: "KOAN Agent Gateway", version: "0.1.0" },
+          });
+          const setup = await rpc.call("session/new", { cwd, mcpServers: [] });
+          return advertisedModels(setup);
+        })(),
+        10_000,
+        `${this.id} model discovery timed out`,
+      );
+    } finally {
+      await rpc.stop();
+    }
+  }
 
   async run(context: RunContext): Promise<void> {
     const rpc = new JsonLineRpc(this.command, this.args, context.cwd, { jsonRpcVersion: "2.0" });
@@ -77,9 +99,7 @@ export class AcpAdapter implements AgentAdapter {
   ): Promise<JsonObject | null> {
     if (!requested) return setup;
     const advertised = category === "model" ? setup?.models : setup?.modes;
-    const advertisedOptions = category === "model"
-      ? advertised?.availableModels
-      : advertised?.availableModes;
+    const advertisedOptions = category === "model" ? advertised?.availableModels : advertised?.availableModes;
     if (Array.isArray(advertisedOptions)) {
       const valueKey = category === "model" ? "modelId" : "id";
       if (!advertisedOptions.some((option: JsonObject) => option[valueKey] === requested)) {
@@ -156,6 +176,38 @@ export class AcpAdapter implements AgentAdapter {
     });
     return { outcome: { outcome: "selected", optionId: decision.optionId } };
   }
+}
+
+export function advertisedModels(setup: JsonObject | null): AgentModelOption[] {
+  const advertised = setup?.models;
+  if (Array.isArray(advertised?.availableModels)) {
+    return advertised.availableModels.flatMap((model: JsonObject) => {
+      const id = String(model.modelId ?? "").trim();
+      if (!id) return [];
+      const description = String(model.description ?? "").trim();
+      return [{
+        id,
+        label: String(model.name ?? model.displayName ?? id),
+        ...(description ? { description } : {}),
+        ...(advertised.currentModelId === id ? { isDefault: true } : {}),
+      }];
+    });
+  }
+  const options = Array.isArray(setup?.configOptions) ? setup.configOptions as JsonObject[] : [];
+  const config = options.find((option) => option.id === "model") ??
+    options.find((option) => option.category === "model" && option.id !== "provider");
+  const values = Array.isArray(config?.options) ? config.options as JsonObject[] : [];
+  return values.flatMap((model) => {
+    const id = String(model.value ?? "").trim();
+    if (!id) return [];
+    const description = String(model.description ?? "").trim();
+    return [{
+      id,
+      label: String(model.name ?? model.label ?? id),
+      ...(description ? { description } : {}),
+      ...(config?.currentValue === id ? { isDefault: true } : {}),
+    }];
+  });
 }
 
 function contentText(content: unknown): string {

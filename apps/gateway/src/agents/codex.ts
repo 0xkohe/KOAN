@@ -1,11 +1,42 @@
-import type { QuestionPrompt } from "../../../../packages/protocol/src/index.ts";
+import type { AgentModelOption, QuestionPrompt } from "../../../../packages/protocol/src/index.ts";
 import { JsonLineRpc, type JsonObject } from "./json-lines.ts";
-import type { AgentAdapter, RunContext } from "./types.ts";
+import { type AgentAdapter, type RunContext, withTimeout } from "./types.ts";
 
 export class CodexAdapter implements AgentAdapter {
   id = "codex" as const;
   command = "codex";
   capabilities = { approvals: true, attachments: true, resume: true, models: true };
+
+  async models(cwd: string): Promise<AgentModelOption[]> {
+    const rpc = new JsonLineRpc(this.command, ["app-server"], cwd);
+    try {
+      return await withTimeout(
+        (async () => {
+          await rpc.call("initialize", {
+            clientInfo: { name: "koan", title: "KOAN", version: "0.1.0" },
+            capabilities: { experimentalApi: true },
+          });
+          await rpc.notify("initialized");
+          const models: AgentModelOption[] = [];
+          let cursor: string | null = null;
+          do {
+            const result = await rpc.call("model/list", {
+              cursor,
+              includeHidden: false,
+              limit: 100,
+            });
+            models.push(...normalizeCodexModels(result?.data));
+            cursor = typeof result?.nextCursor === "string" ? result.nextCursor : null;
+          } while (cursor);
+          return models;
+        })(),
+        10_000,
+        "Codex model discovery timed out",
+      );
+    } finally {
+      await rpc.stop();
+    }
+  }
 
   async run(context: RunContext): Promise<void> {
     const rpc = new JsonLineRpc(this.command, ["app-server"], context.cwd);
@@ -142,6 +173,23 @@ export class CodexAdapter implements AgentAdapter {
       await rpc.stop();
     }
   }
+}
+
+export function normalizeCodexModels(value: unknown): AgentModelOption[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const model = item as JsonObject;
+    const id = String(model.model ?? model.id ?? "").trim();
+    if (!id) return [];
+    const description = String(model.description ?? "").trim();
+    return [{
+      id,
+      label: String(model.displayName ?? id),
+      ...(description ? { description } : {}),
+      ...(model.isDefault === true ? { isDefault: true } : {}),
+    }];
+  });
 }
 
 export function isRetryableCodexError(params: JsonObject): boolean {

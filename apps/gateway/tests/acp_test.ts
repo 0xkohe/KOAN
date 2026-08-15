@@ -1,7 +1,36 @@
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
-import { AcpAdapter } from "../src/agents/acp.ts";
+import { AcpAdapter, advertisedModels } from "../src/agents/acp.ts";
 import type { RunContext } from "../src/agents/types.ts";
+
+Deno.test("ACP model catalog supports dedicated and config-option formats", () => {
+  assert.deepEqual(
+    advertisedModels({
+      models: {
+        currentModelId: "fast",
+        availableModels: [
+          { modelId: "fast", name: "Fast" },
+          { modelId: "smart", description: "More capable" },
+        ],
+      },
+    }),
+    [
+      { id: "fast", label: "Fast", isDefault: true },
+      { id: "smart", label: "smart", description: "More capable" },
+    ],
+  );
+  assert.deepEqual(
+    advertisedModels({
+      configOptions: [{
+        id: "model",
+        category: "model",
+        currentValue: "balanced",
+        options: [{ value: "balanced", label: "Balanced" }],
+      }],
+    }),
+    [{ id: "balanced", label: "Balanced", isDefault: true }],
+  );
+});
 
 Deno.test("ACP applies advertised model and mode config options", async () => {
   const fixture = fileURLToPath(new URL("./fixtures/fake_acp.ts", import.meta.url));

@@ -1,5 +1,6 @@
 import { extname, join, normalize } from "node:path";
 import {
+  agentIdSchema,
   approvalDecisionSchema,
   createSessionInputSchema,
   type GatewayEvent,
@@ -143,6 +144,18 @@ export class GatewayServer {
     }
 
     if (path === "/api/v1/agents" && request.method === "GET") return json({ agents: this.agents.states() });
+    const agentModels = path.match(/^\/api\/v1\/agents\/([^/]+)\/models$/);
+    if (agentModels && request.method === "GET") {
+      const agentId = agentIdSchema.safeParse(agentModels[1]);
+      if (!agentId.success) return apiError(404, "AGENT_NOT_FOUND", "Agent not found", requestId);
+      if (!this.agents.available(agentId.data)) {
+        return apiError(503, "AGENT_UNAVAILABLE", `${agentId.data} is not available`, requestId);
+      }
+      const project = this.store.getProject(url.searchParams.get("projectId") ?? "");
+      if (!project) return apiError(404, "PROJECT_NOT_FOUND", "Project not found", requestId);
+      const checked = await validateProjectPath(project.path, this.config.allowedRoots);
+      return json({ models: await this.agents.models(agentId.data, checked.path) });
+    }
     if (path === "/api/v1/roots" && request.method === "GET") {
       return json({ roots: this.config.allowedRoots });
     }
@@ -178,7 +191,13 @@ export class GatewayServer {
       if (!this.agents.available(body.agentId)) {
         return apiError(503, "AGENT_UNAVAILABLE", `${body.agentId} is not available`, requestId);
       }
-      const session = this.store.createSession(body.projectId, body.agentId, body.model, body.mode);
+      const session = this.store.createSession(
+        body.projectId,
+        body.agentId,
+        body.model,
+        body.mode,
+        body.autoApprove,
+      );
       this.publishSessionCreated(session);
       return json({ session }, 201);
     }

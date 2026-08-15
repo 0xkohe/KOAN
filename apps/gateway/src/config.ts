@@ -23,7 +23,7 @@ export function loadConfig(): GatewayConfig {
   const configuredRoots = splitPaths(Deno.env.get("KOAN_ALLOWED_ROOTS"));
   return {
     host: Deno.env.get("KOAN_HOST") ?? "127.0.0.1",
-    port: Number(Deno.env.get("KOAN_PORT") ?? "8787"),
+    port: Number(Deno.env.get("KOAN_PORT") ?? "18787"),
     dataDir,
     webDir: resolve(Deno.env.get("KOAN_WEB_DIR") ?? join(repoRoot, "apps/web/build/client")),
     allowedRoots: configuredRoots.length ? configuredRoots : [resolve(Deno.cwd())],

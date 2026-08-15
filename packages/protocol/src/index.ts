@@ -25,6 +25,14 @@ export const agentStateSchema = z.object({
 });
 export type AgentState = z.infer<typeof agentStateSchema>;
 
+export const agentModelOptionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional(),
+  isDefault: z.boolean().optional(),
+});
+export type AgentModelOption = z.infer<typeof agentModelOptionSchema>;
+
 export const projectSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -154,6 +162,7 @@ export const createSessionInputSchema = z.object({
   agentId: agentIdSchema,
   model: z.string().trim().min(1).nullable().optional(),
   mode: z.string().trim().min(1).nullable().optional(),
+  autoApprove: z.boolean().optional().default(false),
 });
 export type CreateSessionInput = z.infer<typeof createSessionInputSchema>;
 

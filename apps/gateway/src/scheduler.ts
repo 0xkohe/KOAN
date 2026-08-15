@@ -159,7 +159,8 @@ export class Scheduler {
         agentSessionId: session.agentSessionId,
         signal: controller.signal,
         emit: (type, payload) => this.emit(job.sessionId, type, { ...payload, turnId: job.turnId }),
-        approve: (request) => this.requestApproval(job, request),
+        approve: (request) =>
+          session.autoApprove ? this.autoApprove(job, request) : this.requestApproval(job, request),
         ask: (request) => this.requestQuestion(job, request),
         saveAgentSessionId: (id) => this.store.updateSession(job.sessionId, { agentSessionId: id }),
       });
@@ -204,6 +205,33 @@ export class Scheduler {
         sessionId: job.sessionId,
       })
     );
+  }
+
+  private autoApprove(job: Job, request: ApprovalRequest): Promise<ApprovalDecision> {
+    if (!this.acceptsPrompt(job)) return Promise.reject(new DOMException("Cancelled", "AbortError"));
+    const option =
+      request.options.find((item) =>
+        item.kind === "allow" && /session|always/i.test(`${item.id} ${item.label}`)
+      ) ?? request.options.find((item) => item.kind === "allow");
+    if (!option) return this.requestApproval(job, request);
+    const approval = this.store.createApproval({
+      sessionId: job.sessionId,
+      turnId: job.turnId,
+      ...request,
+    });
+    const decision: ApprovalDecision = {
+      optionId: option.id,
+      scope: /session|always/i.test(`${option.id} ${option.label}`) ? "session" : "once",
+    };
+    if (!this.store.resolveApproval(approval.id, decision.optionId)) {
+      return Promise.reject(new Error("AUTO_APPROVAL_FAILED"));
+    }
+    this.emit(job.sessionId, "approval.resolved", {
+      approvalId: approval.id,
+      ...decision,
+      automatic: true,
+    });
+    return Promise.resolve(decision);
   }
 
   private requestQuestion(job: Job, request: QuestionInput): Promise<QuestionAnswer> {

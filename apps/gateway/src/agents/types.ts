@@ -1,5 +1,6 @@
 import type {
   AgentId,
+  AgentModelOption,
   GatewayEvent,
   QuestionAnswer,
   QuestionPrompt,
@@ -38,5 +39,24 @@ export interface AgentAdapter {
   id: AgentId;
   command: string;
   capabilities: { approvals: boolean; attachments: boolean; resume: boolean; models: boolean };
+  models?(cwd: string): Promise<AgentModelOption[]>;
   run(context: RunContext): Promise<void>;
+}
+
+export async function withTimeout<T>(
+  operation: Promise<T>,
+  timeoutMs: number,
+  message: string,
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<T>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error(message)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }

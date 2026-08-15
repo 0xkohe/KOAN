@@ -27,6 +27,10 @@ const resources = {
       reconnecting: "Reconnecting",
       appearance: "Appearance",
       language: "Language",
+      installApp: "Install KOAN",
+      installHelp: "Add KOAN to your home screen for app-like access.",
+      install: "Install",
+      notNow: "Not now",
     },
   },
   ja: {
@@ -55,6 +59,10 @@ const resources = {
       reconnecting: "再接続中",
       appearance: "外観",
       language: "言語",
+      installApp: "KOANをインストール",
+      installHelp: "ホーム画面からアプリのように起動できます。",
+      install: "インストール",
+      notNow: "後で",
     },
   },
 };

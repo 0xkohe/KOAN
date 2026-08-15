@@ -1,4 +1,4 @@
-import type { AgentId, AgentState } from "../../../../packages/protocol/src/index.ts";
+import type { AgentId, AgentModelOption, AgentState } from "../../../../packages/protocol/src/index.ts";
 import { AcpAdapter } from "./acp.ts";
 import { ClaudeAdapter } from "./claude.ts";
 import { CodexAdapter } from "./codex.ts";
@@ -21,6 +21,7 @@ export class AgentManager {
     opencode: new AcpAdapter("opencode", "opencode", ["acp"]),
   };
   #states: AgentState[] = [];
+  #modelCache = new Map<string, { expiresAt: number; models: AgentModelOption[] }>();
 
   async probe(): Promise<AgentState[]> {
     this.#states = await Promise.all(
@@ -72,6 +73,17 @@ export class AgentManager {
   }
   available(id: AgentId) {
     return this.#states.find((state) => state.id === id)?.available ?? false;
+  }
+  async models(id: AgentId, cwd: string): Promise<AgentModelOption[]> {
+    const key = `${id}\0${cwd}`;
+    const cached = this.#modelCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return cached.models;
+    const models = await this.adapter(id).models?.(cwd) ?? [];
+    this.#modelCache.set(key, {
+      expiresAt: Date.now() + 5 * 60 * 1000,
+      models,
+    });
+    return models;
   }
 }
 

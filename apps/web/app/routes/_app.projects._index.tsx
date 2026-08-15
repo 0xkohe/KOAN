@@ -6,10 +6,11 @@ import { api } from "../lib/api";
 import { useAppData } from "../lib/app-context";
 
 export default function Projects() {
-  const { projects } = useAppData();
+  const { projects, roots } = useAppData();
   const { t } = useTranslation();
   const revalidator = useRevalidator();
-  const [path, setPath] = useState("");
+  const defaultPath = roots[0] ?? "";
+  const [path, setPath] = useState(defaultPath);
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -19,7 +20,7 @@ export default function Projects() {
     setError("");
     try {
       await api.createProject(path, name || undefined);
-      setPath("");
+      setPath(defaultPath);
       setName("");
       await revalidator.revalidate();
     } catch (reason) {

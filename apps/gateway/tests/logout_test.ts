@@ -9,7 +9,7 @@ Deno.test("logout revokes the authenticated device token", async () => {
   try {
     const config: GatewayConfig = {
       host: "127.0.0.1",
-      port: 8787,
+      port: 18787,
       dataDir: directory,
       webDir: directory,
       allowedRoots: [directory],
@@ -29,11 +29,11 @@ Deno.test("logout revokes the authenticated device token", async () => {
     );
 
     const response = await server.handle(
-      new Request("http://127.0.0.1:8787/api/v1/auth/logout", {
+      new Request("http://127.0.0.1:18787/api/v1/auth/logout", {
         method: "POST",
         headers: {
           cookie: `koan_device=${token}`,
-          origin: "http://127.0.0.1:8787",
+          origin: "http://127.0.0.1:18787",
           "x-koan-csrf": "1",
         },
       }),

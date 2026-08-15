@@ -1,0 +1,674 @@
+<title>KOAN — Logo</title>
+<style>
+  :root {
+    /* light — KOAN の既存トークンを継承 */
+    --canvas: #f5f5f7;
+    --surface: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6e6e73;
+    --faint: #a1a1a6;
+    --hairline: #e5e5e7;
+    --accent: #0066cc;
+
+    /* ブランド固定値（テーマで動かさない） */
+    --fixed-blue: #0066cc;
+    --fixed-blue-dark: #2997ff;
+    --fixed-black: #000000;
+    --fixed-ink: #1d1d1f;
+    --fixed-muted: #6e6e73;
+    --fixed-faint: #a1a1a6;
+    --fixed-white: #ffffff;
+    --fixed-hairline-dark: #343437;
+
+    --font-display: "SF Pro Display", -apple-system, BlinkMacSystemFont,
+      "Segoe UI", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+      monospace;
+
+    --pad: clamp(20px, 5vw, 56px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --canvas: #000000;
+      --surface: #1c1c1e;
+      --ink: #f5f5f7;
+      --muted: #a1a1a6;
+      --faint: #6e6e73;
+      --hairline: #343437;
+      --accent: #2997ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --canvas: #000000;
+    --surface: #1c1c1e;
+    --ink: #f5f5f7;
+    --muted: #a1a1a6;
+    --faint: #6e6e73;
+    --hairline: #343437;
+    --accent: #2997ff;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1060px; margin-inline: auto; padding-inline: var(--pad); }
+  code { font-family: var(--font-mono); font-size: 0.85em; }
+
+  /* ── type ─────────────────────────────────────────── */
+  .eyebrow {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(36px, 6.4vw, 58px);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.032em;
+    text-wrap: balance;
+  }
+  h2 {
+    margin: 0;
+    font-size: clamp(21px, 2.6vw, 26px);
+    font-weight: 600;
+    letter-spacing: -0.021em;
+    text-wrap: balance;
+  }
+  h3 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.012em; }
+  p { margin: 0; }
+  .lede {
+    font-size: clamp(17px, 2vw, 20px);
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 46ch;
+    letter-spacing: -0.008em;
+  }
+  .body { font-size: 15.5px; line-height: 1.6; color: var(--muted); max-width: 62ch; }
+  .cap {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .cap b { color: var(--muted); font-weight: 500; }
+  .accent { color: var(--accent); }
+
+  /* ── sections ─────────────────────────────────────── */
+  section { border-top: 1px solid var(--hairline); }
+  .sec-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding-block: clamp(48px, 7vw, 84px);
+  }
+  .sec-head { display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── hero ─────────────────────────────────────────── */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 44px;
+    align-items: center;
+    padding-block: clamp(52px, 9vw, 104px) clamp(44px, 7vw, 76px);
+  }
+  @media (min-width: 820px) {
+    .hero { grid-template-columns: 1fr 0.8fr; gap: 56px; }
+  }
+  .hero-copy { display: flex; flex-direction: column; gap: 20px; }
+  .hero-stage {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border: 1px solid var(--hairline);
+    border-radius: 26px;
+    background: var(--surface);
+  }
+  .hero-mark { width: 58%; height: auto; }
+
+  /* ── mark ─────────────────────────────────────────────
+     ring = fill:currentColor (color を継承)
+     caret = stroke を継承 → 2 チャンネルで色を独立制御     */
+  .mark { color: var(--ink); stroke: var(--accent); }
+
+  /* ── tiles ────────────────────────────────────────── */
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .tile {
+    display: grid;
+    place-items: center;
+    min-height: 178px;
+    padding: 28px;
+    border: 1px solid var(--hairline);
+    border-radius: 18px;
+    background: var(--surface);
+  }
+  .tile.on-light { background: var(--fixed-white); }
+  .tile.on-dark { background: var(--fixed-black); border-color: var(--fixed-hairline-dark); }
+  .tile.on-blue { background: var(--fixed-blue); border-color: transparent; }
+  .tile.on-canvas { background: var(--canvas); }
+  .figure { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+  /* 固定地色のタイル内は色を literal で固定 */
+  .on-light { color: var(--fixed-ink); }
+  .on-light .mark { color: var(--fixed-ink); stroke: var(--fixed-blue); }
+  .on-dark { color: var(--fixed-white); }
+  .on-dark .mark { color: var(--fixed-white); stroke: var(--fixed-blue-dark); }
+  .on-blue { color: var(--fixed-white); }
+  .on-blue .mark { color: var(--fixed-white); stroke: var(--fixed-white); }
+  .mono-ink .mark { color: var(--fixed-ink); stroke: var(--fixed-ink); }
+  .mono-white .mark { color: var(--fixed-white); stroke: var(--fixed-white); }
+
+  /* ── lockups ──────────────────────────────────────── */
+  .lockup {
+    display: flex;
+    align-items: center;
+    gap: 0.42em;
+    font-size: 34px;
+    line-height: 1;
+  }
+  .lockup .mark { width: 1.16em; height: 1.16em; flex: none; }
+  .lockup .word { font-weight: 600; letter-spacing: 0.012em; }
+  .lockup-text { display: flex; flex-direction: column; gap: 0.16em; }
+  .lockup-tag {
+    font-family: var(--font-mono);
+    font-size: 0.27em;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    color: var(--fixed-muted);
+  }
+  .on-dark .lockup-tag { color: var(--fixed-faint); }
+  .lockup.stack { flex-direction: column; gap: 0.34em; font-size: 26px; }
+  .lockup.stack .mark { width: 1.5em; height: 1.5em; }
+
+  /* wordmark — O をマークで置換 */
+  .wordmark {
+    display: flex;
+    align-items: center;
+    font-size: clamp(34px, 5.6vw, 46px);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .wordmark .mark {
+    width: 0.94em;   /* 外形 0.74em = 大文字高 +3% のオーバーシュート */
+    height: 0.94em;
+    margin-left: 0.02em;
+    margin-right: 0.085em;  /* キャレットの先に A ぶんの空気を残す */
+    flex: none;
+  }
+
+  /* ── size ladder ──────────────────────────────────── */
+  .size-rows { display: flex; flex-direction: column; gap: 26px; }
+  .size-row { display: flex; flex-direction: column; gap: 14px; }
+
+  /* ── app icon ─────────────────────────────────────── */
+  .icon {
+    display: grid;
+    place-items: center;
+    width: clamp(96px, 12vw, 124px);
+    aspect-ratio: 1;
+    border-radius: 22.5%;
+    flex: none;
+  }
+  .icon .mark { width: 60%; height: 60%; }
+  .icon-blue { background: var(--fixed-blue); }
+  .icon-blue .mark { color: var(--fixed-white); stroke: var(--fixed-white); }
+  .icon-black { background: var(--fixed-black); box-shadow: inset 0 0 0 1px var(--fixed-hairline-dark); }
+  .icon-black .mark { color: var(--fixed-white); stroke: var(--fixed-blue-dark); }
+  .icon-white { background: var(--fixed-white); box-shadow: inset 0 0 0 1px #e5e5e7; }
+  .icon-white .mark { color: var(--fixed-ink); stroke: var(--fixed-blue); }
+
+  /* ── favicon actual sizes ─────────────────────────── */
+  .fav-row { display: flex; align-items: flex-end; gap: 26px; flex-wrap: wrap; }
+  .fav { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .fav .chip {
+    display: grid;
+    place-items: center;
+    border-radius: 22.5%;
+    background: var(--fixed-blue);
+  }
+  .fav .chip .mark { color: var(--fixed-white); stroke: var(--fixed-white); }
+  .fav .chip.bare { background: transparent; }
+  .fav .chip.bare .mark { color: var(--ink); stroke: var(--accent); }
+
+  /* ── clear space ──────────────────────────────────── */
+  .clear-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 178px;
+    padding: 22%;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 18px;
+  }
+  .clear-stage .guide {
+    position: absolute;
+    inset: 22%;
+    border: 1px dashed color-mix(in srgb, var(--accent) 50%, transparent);
+    border-radius: 3px;
+  }
+  .clear-stage .mark { width: 100%; height: auto; max-width: 96px; position: relative; }
+
+  /* ── tokens table ─────────────────────────────────── */
+  .table-scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 540px; font-size: 14px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--hairline); }
+  th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  td.hex { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+  .sw {
+    display: inline-block;
+    width: 36px;
+    height: 18px;
+    border-radius: 5px;
+    vertical-align: -4px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 16%, transparent);
+  }
+
+  /* ── notes ────────────────────────────────────────── */
+  .notes { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(236px, 1fr)); }
+  .note {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+    background: var(--surface);
+  }
+  .note .k {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .note p { font-size: 14.5px; line-height: 1.6; color: var(--muted); }
+
+  pre {
+    margin: 0;
+    overflow-x: auto;
+    padding: 20px;
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+  pre .t { color: var(--accent); }
+  footer { border-top: 1px solid var(--hairline); }
+  footer .sec-inner { padding-block: 30px 56px; }
+
+  /* ── draw-on: 一筆 ────────────────────────────────── */
+  .reveal-line {
+    stroke-dasharray: 228;
+    stroke-dashoffset: 228;
+    animation: enso 1.5s cubic-bezier(0.3, 0.05, 0.2, 1) 0.2s forwards;
+  }
+  .caret-in { opacity: 0; animation: caret-in 0.5s ease-out 1.5s forwards; }
+  @keyframes enso { to { stroke-dashoffset: 0; } }
+  @keyframes caret-in {
+    from { opacity: 0; transform: translateX(-4px); }
+    to { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-line { animation: none; stroke-dashoffset: 0; }
+    .caret-in { animation: none; opacity: 1; }
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <path id="koan-ring" fill="currentColor" stroke="none" d="M103.96 80.5L101.7 84.6L99.06 88.45L96.07 92.03L92.75 95.3L89.14 98.23L85.28 100.79L81.19 102.96L76.91 104.73L72.5 106.07L67.98 106.98L63.41 107.45L58.82 107.47L54.25 107.05L49.76 106.2L45.37 104.92L41.14 103.23L37.1 101.14L33.28 98.67L29.73 95.85L26.47 92.71L23.53 89.27L20.94 85.58L18.72 81.65L16.89 77.54L15.48 73.28L14.48 68.91L13.9 64.47L13.76 60L14.05 55.55L14.76 51.15L15.9 46.85L17.44 42.68L19.37 38.69L21.67 34.9L24.32 31.37L27.3 28.11L30.57 25.15L34.11 22.53L37.88 20.26L41.84 18.37L45.96 16.88L50.2 15.78L54.52 15.11L58.87 14.85L63.23 15.01L67.55 15.58L71.78 16.57L75.9 17.96L79.85 19.74L83.62 21.89L87.16 24.38L90.43 27.2L93.42 30.32L96.1 33.7L98.44 37.33L100.42 41.15A2.6 2.6 0 0 1 95.71 43.35L93.91 39.99L91.8 36.84L89.38 33.9L86.7 31.22L83.77 28.82L80.63 26.71L77.3 24.92L73.81 23.47L70.21 22.36L66.52 21.6L62.79 21.21L59.03 21.18L55.3 21.51L51.62 22.21L48.03 23.25L44.57 24.63L41.26 26.34L38.14 28.36L35.23 30.67L32.57 33.24L30.17 36.05L28.05 39.08L26.24 42.29L24.76 45.66L23.61 49.15L22.8 52.72L22.34 56.35L22.24 60L22.49 63.64L23.09 67.22L24.03 70.73L25.3 74.12L26.89 77.37L28.79 80.44L30.96 83.3L33.4 85.94L36.08 88.33L38.97 90.44L42.04 92.26L45.27 93.77L48.62 94.95L52.06 95.81L55.56 96.33L59.09 96.5L62.61 96.34L66.09 95.84L69.5 95L72.8 93.84L75.97 92.38L78.97 90.61L81.78 88.57L84.38 86.28L86.74 83.74L88.83 81L90.65 78.08L92.17 75A6.5 6.5 0 0 1 103.96 80.5Z"/>
+    <path id="koan-caret" d="M97 51.5L105 58L97 64.5" fill="none" stroke-width="6.5"
+      stroke-linecap="round" stroke-linejoin="round"/>
+  </defs>
+  <symbol id="koan-mark" viewBox="0 0 120 120">
+    <use href="#koan-ring"/>
+    <use href="#koan-caret"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">KOAN — Identity</p>
+      <h1>開かれた円と、<br>ひとつの問い。</h1>
+      <p class="lede">
+        円相は一息で描かれ、閉じないまま残される。KOAN ではその開口に
+        プロンプトの <span class="accent">›</span> が座ります。手元の PC に閉じた環へ、
+        電話から問いを一つ差し入れる — サービスの形そのものを一文字に収めたマークです。
+      </p>
+      <p class="cap"><b>Mark</b> 円相 + プロンプトキャレット&nbsp;&nbsp;·&nbsp;&nbsp;<b>Accent</b> Action Blue #0066cc</p>
+    </div>
+    <div class="hero-stage">
+      <svg class="mark hero-mark" viewBox="0 0 120 120" role="img" aria-label="KOAN のロゴマーク">
+        <defs>
+          <mask id="ensoReveal">
+            <path class="reveal-line" d="M98.06 77.75A42 42 0 1 1 98.06 42.25"
+              fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"/>
+          </mask>
+        </defs>
+        <g mask="url(#ensoReveal)"><use href="#koan-ring"/></g>
+        <use class="caret-in" href="#koan-caret"/>
+      </svg>
+    </div>
+  </header>
+</div>
+
+<section>
+  <div class="wrap sec-inner">
+    <div class="sec-head">
+      <p class="eyebrow">Concept</p>
+      <h2>マークが担う三つの意味</h2>
+    </div>
+    <div class="notes">
+      <div class="note">
+        <span class="k">公案</span>
+        <h3>閉じない円</h3>
+        <p>禅の円相。完結を拒む一筆が、答えを配るのではなく問いを扱う道具であることを示します。</p>
+      </div>
+      <div class="note">
+        <span class="k">Prompt</span>
+        <h3>開口に座る <span class="accent">›</span></h3>
+        <p>ターミナルのプロンプトであり、送信の合図でもある。外に開いた唯一の口 — tailnet へ公開されるひとつのポートです。</p>
+      </div>
+      <div class="note">
+        <span class="k">One breath</span>
+        <h3>起筆から離筆へ</h3>
+        <p>右下で太く着地し、右上で細く抜ける。一息で引かれる線は、プロジェクトごとに 1 ターンずつ直列で走る Gateway の挙動に重なります。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap sec-inner">
+    <div class="sec-head">
+      <p class="eyebrow">Lockups</p>
+      <h2>ロックアップ</h2>
+      <p class="body">横組みが基本形。マークの枠はフォントサイズの 1.16 倍、マークと文字の間隔は 0.42 倍で固定します（外形は大文字高の約 1.28 倍になります）。</p>
+    </div>
+    <div class="grid g2">
+      <div class="figure">
+        <div class="tile on-light">
+          <div class="lockup">
+            <svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg>
+            <span class="lockup-text">
+              <span class="word">KOAN</span>
+              <span class="lockup-tag">Agent Gateway</span>
+            </span>
+          </div>
+        </div>
+        <p class="cap"><b>Primary</b> — マーク + ワードマーク + ディスクリプター</p>
+      </div>
+      <div class="figure">
+        <div class="tile on-dark">
+          <div class="lockup">
+            <svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg>
+            <span class="lockup-text">
+              <span class="word">KOAN</span>
+              <span class="lockup-tag">Agent Gateway</span>
+            </span>
+          </div>
+        </div>
+        <p class="cap"><b>Primary / dark</b> — キャレットを #2997ff に差し替え</p>
+      </div>
+      <div class="figure">
+        <div class="tile on-light">
+          <div class="lockup">
+            <svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg>
+            <span class="word">KOAN</span>
+          </div>
+        </div>
+        <p class="cap"><b>Compact</b> — サイドバー・ヘッダー用</p>
+      </div>
+      <div class="figure">
+        <div class="tile on-light">
+          <div class="lockup stack">
+            <svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg>
+            <span class="word">KOAN</span>
+          </div>
+        </div>
+        <p class="cap"><b>Stacked</b> — ペアリング画面・スプラッシュ用</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap sec-inner">
+    <div class="sec-head">
+      <p class="eyebrow">Wordmark</p>
+      <h2>O をマークで置き換える</h2>
+      <p class="body">ワードマーク単体で使う場合の変形。マークがそのまま O として機能します。可読性の下限があるため 40px 以上での使用に限定してください。</p>
+    </div>
+    <div class="grid g2">
+      <div class="figure">
+        <div class="tile on-light">
+          <div class="wordmark">
+            <span>K</span>
+            <svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg>
+            <span>AN</span>
+          </div>
+        </div>
+        <p class="cap"><b>Wordmark</b> — on white</p>
+      </div>
+      <div class="figure">
+        <div class="tile on-dark">
+          <div class="wordmark">
+            <span>K</span>
+            <svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg>
+            <span>AN</span>
+          </div>
+        </div>
+        <p class="cap"><b>Wordmark</b> — on black</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap sec-inner">
+    <div class="sec-head">
+      <p class="eyebrow">App icon</p>
+      <h2>ホーム画面のアイコン</h2>
+      <p class="body">PWA としてホーム画面に置かれることが前提。角丸は iOS 準拠の 22.5%、マークは辺長の 60%。青地・白抜きが第一候補です。</p>
+    </div>
+    <div class="grid g3">
+      <div class="figure">
+        <div class="tile on-canvas">
+          <div class="icon icon-blue"><svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg></div>
+        </div>
+        <p class="cap"><b>Primary</b> — #0066cc 地・白の単色</p>
+      </div>
+      <div class="figure">
+        <div class="tile on-canvas">
+          <div class="icon icon-black"><svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg></div>
+        </div>
+        <p class="cap"><b>Dark</b> — 黒地 + #2997ff キャレット</p>
+      </div>
+      <div class="figure">
+        <div class="tile on-canvas">
+          <div class="icon icon-white"><svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg></div>
+        </div>
+        <p class="cap"><b>Light</b> — 白地 + #0066cc キャレット</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap sec-inner">
+    <div class="sec-head">
+      <p class="eyebrow">Small sizes</p>
+      <h2>実寸での可読性</h2>
+      <p class="body">32px 以上ならキャレットまで判別できます。24px 以下は開口とキャレットが潰れて団子になるため、円相だけの簡略形に切り替えてください。開いた円だけでも KOAN は identify できます。</p>
+    </div>
+    <div class="size-rows">
+      <div class="size-row">
+        <span class="cap"><b>Full mark</b> — 32px 以上</span>
+        <div class="fav-row">
+          <div class="fav">
+            <div class="chip" style="width:32px;height:32px"><svg class="mark" viewBox="0 0 120 120" style="width:20px;height:20px" aria-hidden="true"><use href="#koan-mark"/></svg></div>
+            <span class="cap">32</span>
+          </div>
+          <div class="fav">
+            <div class="chip" style="width:48px;height:48px"><svg class="mark" viewBox="0 0 120 120" style="width:29px;height:29px" aria-hidden="true"><use href="#koan-mark"/></svg></div>
+            <span class="cap">48</span>
+          </div>
+          <div class="fav">
+            <div class="chip" style="width:64px;height:64px"><svg class="mark" viewBox="0 0 120 120" style="width:39px;height:39px" aria-hidden="true"><use href="#koan-mark"/></svg></div>
+            <span class="cap">64</span>
+          </div>
+          <div class="fav">
+            <div class="chip bare" style="width:64px;height:64px"><svg class="mark" viewBox="0 0 120 120" style="width:64px;height:64px" aria-hidden="true"><use href="#koan-mark"/></svg></div>
+            <span class="cap">64 / 地なし</span>
+          </div>
+        </div>
+      </div>
+      <div class="size-row">
+        <span class="cap"><b>Reduced</b> — 24px 以下・円相のみ（キャレット省略）</span>
+        <div class="fav-row">
+          <div class="fav">
+            <div class="chip" style="width:16px;height:16px"><svg class="mark" viewBox="0 0 120 120" style="width:11px;height:11px" aria-hidden="true"><use href="#koan-ring"/></svg></div>
+            <span class="cap">16</span>
+          </div>
+          <div class="fav">
+            <div class="chip" style="width:20px;height:20px"><svg class="mark" viewBox="0 0 120 120" style="width:13px;height:13px" aria-hidden="true"><use href="#koan-ring"/></svg></div>
+            <span class="cap">20</span>
+          </div>
+          <div class="fav">
+            <div class="chip" style="width:24px;height:24px"><svg class="mark" viewBox="0 0 120 120" style="width:15px;height:15px" aria-hidden="true"><use href="#koan-ring"/></svg></div>
+            <span class="cap">24</span>
+          </div>
+          <div class="fav">
+            <div class="chip bare" style="width:44px;height:44px"><svg class="mark" viewBox="0 0 120 120" style="width:44px;height:44px" aria-hidden="true"><use href="#koan-ring"/></svg></div>
+            <span class="cap">拡大・地なし</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap sec-inner">
+    <div class="sec-head">
+      <p class="eyebrow">Single colour &amp; spacing</p>
+      <h2>単色運用と余白</h2>
+    </div>
+    <div class="grid g3">
+      <div class="figure">
+        <div class="tile on-light mono-ink">
+          <svg class="mark" viewBox="0 0 120 120" style="width:80px;height:80px" aria-hidden="true"><use href="#koan-mark"/></svg>
+        </div>
+        <p class="cap"><b>Mono / ink</b> — 1 色印刷・刻印</p>
+      </div>
+      <div class="figure">
+        <div class="tile on-blue mono-white">
+          <svg class="mark" viewBox="0 0 120 120" style="width:80px;height:80px" aria-hidden="true"><use href="#koan-mark"/></svg>
+        </div>
+        <p class="cap"><b>Reversed</b> — Action Blue 地に白抜き</p>
+      </div>
+      <div class="figure">
+        <div class="clear-stage">
+          <span class="guide"></span>
+          <svg class="mark" viewBox="0 0 120 120" aria-hidden="true"><use href="#koan-mark"/></svg>
+        </div>
+        <p class="cap"><b>Clear space</b> — 起筆幅（マーク高の 11%）×2 を四辺に確保</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap sec-inner">
+    <div class="sec-head">
+      <p class="eyebrow">Tokens</p>
+      <h2>色と書体</h2>
+      <p class="body"><code>apps/web/app/styles.css</code> の既存トークンをそのまま使用しています。ロゴのために新しい色は追加していません。</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Swatch</th><th>Token</th><th>Value</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="sw" style="background:#0066cc"></span></td>
+            <td class="hex">--color-blue</td><td class="hex">#0066cc</td><td class="hex">キャレット / アイコン地（light）</td>
+          </tr>
+          <tr>
+            <td><span class="sw" style="background:#2997ff"></span></td>
+            <td class="hex">--color-blue&nbsp;·&nbsp;dark</td><td class="hex">#2997ff</td><td class="hex">キャレット（dark）</td>
+          </tr>
+          <tr>
+            <td><span class="sw" style="background:#1d1d1f"></span></td>
+            <td class="hex">--color-ink</td><td class="hex">#1d1d1f</td><td class="hex">円相 / ワードマーク（light）</td>
+          </tr>
+          <tr>
+            <td><span class="sw" style="background:#f5f5f7"></span></td>
+            <td class="hex">--color-ink&nbsp;·&nbsp;dark</td><td class="hex">#f5f5f7</td><td class="hex">円相 / ワードマーク（dark）</td>
+          </tr>
+          <tr>
+            <td><span class="sw" style="background:#6e6e73"></span></td>
+            <td class="hex">--color-muted</td><td class="hex">#6e6e73</td><td class="hex">ディスクリプター</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cap">
+      <b>Display</b> SF Pro Display / -apple-system — 600, tracking −0.03em&nbsp;&nbsp;·&nbsp;&nbsp;<b>Descriptor</b> ui-monospace — uppercase, tracking +0.17em
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap sec-inner">
+    <div class="sec-head">
+      <p class="eyebrow">Source</p>
+      <h2>SVG</h2>
+      <p class="body">円相は <code>currentColor</code>、キャレットは継承された <code>stroke</code> で色が決まります。親要素に <code>color</code> と <code>stroke</code> を与えるだけで全バリエーションを作れます。</p>
+    </div>
+    <pre>&lt;svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
+     style="color:#1d1d1f; stroke:#0066cc"
+     role="img" aria-label="KOAN"&gt;
+  <span class="t">&lt;!-- enso: 起筆 13 → 離筆 5.2 / 右方 50° を開口 --&gt;</span>
+  &lt;path fill="currentColor" stroke="none" d="M103.96 80.5 … Z"/&gt;
+  <span class="t">&lt;!-- prompt caret --&gt;</span>
+  &lt;path d="M97 51.5L105 58L97 64.5" fill="none" stroke-width="6.5"
+        stroke-linecap="round" stroke-linejoin="round"/&gt;
+&lt;/svg&gt;</pre>
+    <p class="cap">完全な path データはこのページのソース内 <b>#koan-ring</b>（1,380 字）にあります。ファイル化するなら <b>apps/web/public/koan-mark.svg</b> と <b>icon-180 / 192 / 512.png</b>、<b>favicon.svg</b> を推奨。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap sec-inner">
+    <p class="cap">KOAN Agent Gateway — private, single-user, tailnet-only.</p>
+  </div>
+</footer>

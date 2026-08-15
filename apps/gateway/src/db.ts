@@ -68,7 +68,7 @@ export class Store {
       CREATE TABLE IF NOT EXISTS sessions (
         id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
         agent_id TEXT NOT NULL, title TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'idle',
-        model TEXT, mode TEXT, agent_session_id TEXT,
+        model TEXT, mode TEXT, auto_approve INTEGER NOT NULL DEFAULT 0, agent_session_id TEXT,
         created_at TEXT NOT NULL, updated_at TEXT NOT NULL, last_seq INTEGER NOT NULL DEFAULT 0,
         archived_at TEXT
       );
@@ -124,6 +124,11 @@ export class Store {
       ON attachments(created_at) WHERE consumed_at IS NULL;
       INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES (2, datetime('now'));
     `);
+    const sessionColumns = this.db.prepare("PRAGMA table_info(sessions)").all() as Row[];
+    if (!sessionColumns.some((column) => column.name === "auto_approve")) {
+      this.db.exec("ALTER TABLE sessions ADD COLUMN auto_approve INTEGER NOT NULL DEFAULT 0");
+    }
+    this.db.exec("INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES (3, datetime('now'))");
   }
 
   private markInterrupted() {
@@ -209,7 +214,7 @@ export class Store {
 
   getSessionWithProject(
     id: string,
-  ): (Session & { projectPath: string; agentSessionId: string | null }) | null {
+  ): (Session & { projectPath: string; agentSessionId: string | null; autoApprove: boolean }) | null {
     const row = this.db.prepare(`SELECT s.*, p.name project_name, p.path project_path FROM sessions s
       JOIN projects p ON p.id=s.project_id WHERE s.id=?`).get(id) as Row | undefined;
     if (!row) return null;
@@ -217,16 +222,34 @@ export class Store {
       ...sessionFromRow(row),
       projectPath: String(row.project_path),
       agentSessionId: row.agent_session_id ? String(row.agent_session_id) : null,
+      autoApprove: Boolean(row.auto_approve),
     };
   }
 
-  createSession(projectId: string, agentId: AgentId, model?: string | null, mode?: string | null): Session {
+  createSession(
+    projectId: string,
+    agentId: AgentId,
+    model?: string | null,
+    mode?: string | null,
+    autoApprove = false,
+  ): Session {
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     this.db.prepare(
-      `INSERT INTO sessions(id,project_id,agent_id,title,status,model,mode,created_at,updated_at)
-      VALUES (?,?,?,?,?,?,?,?,?)`,
-    ).run(id, projectId, agentId, "New session", "idle", model ?? null, mode ?? null, now, now);
+      `INSERT INTO sessions(id,project_id,agent_id,title,status,model,mode,auto_approve,created_at,updated_at)
+      VALUES (?,?,?,?,?,?,?,?,?,?)`,
+    ).run(
+      id,
+      projectId,
+      agentId,
+      "New session",
+      "idle",
+      model ?? null,
+      mode ?? null,
+      autoApprove ? 1 : 0,
+      now,
+      now,
+    );
     return this.getSession(id)!;
   }
 

@@ -12,7 +12,7 @@ Deno.test("HTML responses apply the CSP nonce to React Router bootstrap scripts"
     );
     const config: GatewayConfig = {
       host: "127.0.0.1",
-      port: 8787,
+      port: 18787,
       dataDir: directory,
       webDir: directory,
       allowedRoots: [directory],
@@ -21,7 +21,7 @@ Deno.test("HTML responses apply the CSP nonce to React Router bootstrap scripts"
     };
     const server = new GatewayServer(config, {} as never, {} as never, {} as never, {} as never);
 
-    const response = await server.handle(new Request("http://127.0.0.1:8787/"));
+    const response = await server.handle(new Request("http://127.0.0.1:18787/"));
     const csp = response.headers.get("content-security-policy") ?? "";
     const nonce = csp.match(/script-src 'self' 'nonce-([^']+)'/)?.[1];
     assert.ok(nonce);
@@ -39,7 +39,7 @@ Deno.test("static file misses fall back only for HTML navigation", async () => {
     await Deno.writeTextFile(join(directory, "index.html"), "<html><body>KOAN</body></html>");
     const config: GatewayConfig = {
       host: "127.0.0.1",
-      port: 8787,
+      port: 18787,
       dataDir: directory,
       webDir: directory,
       allowedRoots: [directory],
@@ -48,10 +48,10 @@ Deno.test("static file misses fall back only for HTML navigation", async () => {
     };
     const server = new GatewayServer(config, {} as never, {} as never, {} as never, {} as never);
 
-    const asset = await server.handle(new Request("http://127.0.0.1:8787/assets/old.js"));
+    const asset = await server.handle(new Request("http://127.0.0.1:18787/assets/old.js"));
     assert.equal(asset.status, 404);
     const navigation = await server.handle(
-      new Request("http://127.0.0.1:8787/sessions/example", {
+      new Request("http://127.0.0.1:18787/sessions/example", {
         headers: { accept: "text/html,application/xhtml+xml" },
       }),
     );

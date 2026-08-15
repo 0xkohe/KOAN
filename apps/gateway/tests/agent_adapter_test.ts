@@ -14,6 +14,7 @@ import {
   codexPermissionDescription,
   codexTurnCompletionError,
   isRetryableCodexError,
+  normalizeCodexModels,
   normalizeCodexQuestion,
 } from "../src/agents/codex.ts";
 import type { RunContext } from "../src/agents/types.ts";
@@ -76,6 +77,24 @@ Deno.test("Codex declines unsupported MCP elicitation with a valid response", ()
   });
 });
 
+Deno.test("Codex model catalog uses runnable model IDs", () => {
+  assert.deepEqual(
+    normalizeCodexModels([{
+      id: "picker-row",
+      model: "gpt-example",
+      displayName: "GPT Example",
+      description: "Example model",
+      isDefault: true,
+    }]),
+    [{
+      id: "gpt-example",
+      label: "GPT Example",
+      description: "Example model",
+      isDefault: true,
+    }],
+  );
+});
+
 Deno.test("Claude offers session approval only when permission suggestions can persist it", () => {
   assert.deepEqual(claudeApprovalOptions(false).map((option) => option.id), ["allow_once", "deny"]);
   assert.deepEqual(claudeApprovalOptions(true).map((option) => option.id), [
@@ -106,6 +125,31 @@ Deno.test("Claude session approvals cannot persist permission suggestions", () =
       destination: "session",
     }],
   );
+});
+
+Deno.test("Claude model catalog is read from the SDK", async () => {
+  let closed = false;
+  const adapter = new ClaudeAdapter(
+    (() =>
+      fakeQuery([], undefined, {
+        supportedModels: () =>
+          Promise.resolve([{
+            value: "sonnet",
+            displayName: "Sonnet",
+            description: "Balanced model",
+          }]),
+        close: () => {
+          closed = true;
+        },
+      })) as never,
+  );
+
+  assert.deepEqual(await adapter.models(Deno.cwd()), [{
+    id: "sonnet",
+    label: "Sonnet",
+    description: "Balanced model",
+  }]);
+  assert.equal(closed, true);
 });
 
 Deno.test("Codex cancellation during initialization does not create an unhandled rejection", async () => {
@@ -175,7 +219,11 @@ Deno.test("Claude does not retry a resume after turn output has started", async 
   assert.equal(calls, 1);
 });
 
-function fakeQuery(messages: SDKMessage[], error?: Error) {
+function fakeQuery(
+  messages: SDKMessage[],
+  error?: Error,
+  overrides: Record<string, unknown> = {},
+) {
   const stream = (async function* () {
     for (const message of messages) yield message;
     if (error) throw error;
@@ -183,6 +231,7 @@ function fakeQuery(messages: SDKMessage[], error?: Error) {
   return Object.assign(stream, {
     interrupt: () => Promise.resolve(undefined),
     close: () => {},
+    ...overrides,
   });
 }
 

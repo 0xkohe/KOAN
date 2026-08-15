@@ -8,6 +8,7 @@ import {
   Outlet,
   redirect,
   useLoaderData,
+  useMatch,
 } from "react-router";
 import { Brand } from "../components/brand";
 import { IconLabel } from "../components/icons";
@@ -18,12 +19,13 @@ import { LiveProvider, useLive } from "../lib/live";
 export async function clientLoader() {
   const auth = await api.authStatus();
   if (!auth.paired) throw redirect("/pair");
-  const [{ projects }, { sessions }, { agents }] = await Promise.all([
+  const [{ projects }, { sessions }, { agents }, { roots }] = await Promise.all([
     api.projects(),
     api.sessions(),
     api.agents(),
+    api.roots(),
   ]);
-  return { auth, projects, sessions, agents };
+  return { auth, projects, sessions, agents, roots };
 }
 
 export default function AppLayout() {
@@ -38,6 +40,7 @@ export default function AppLayout() {
 function Shell({ data }: { data: Awaited<ReturnType<typeof clientLoader>> }) {
   const { t } = useTranslation();
   const { connected, notices, dismissNotice, sessions } = useLive();
+  const inSession = useMatch("/sessions/:sessionId");
   const [newOpen, setNewOpen] = useState(false);
   const links = [
     { to: href("/"), label: "Home", icon: Home, end: true },
@@ -101,13 +104,15 @@ function Shell({ data }: { data: Awaited<ReturnType<typeof clientLoader>> }) {
           </NavLink>
         ))}
       </nav>
-      <button
-        className="mobile-new"
-        aria-label={t("newSession")}
-        onClick={() => setNewOpen(true)}
-      >
-        <Plus size={22} />
-      </button>
+      {!inSession && (
+        <button
+          className="mobile-new"
+          aria-label={t("newSession")}
+          onClick={() => setNewOpen(true)}
+        >
+          <Plus size={22} />
+        </button>
+      )}
       <NewSessionDialog
         projects={data.projects}
         agents={data.agents}
