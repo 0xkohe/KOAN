@@ -284,6 +284,142 @@ button:disabled {
   border-color: color-mix(in srgb, var(--color-blue) 45%,
     var(--color-hairline));
 }
+.project-connect {
+  display: grid;
+  gap: 18px;
+}
+.directory-browser-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 34%);
+  align-items: end;
+  gap: 16px;
+}
+.directory-browser-label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.directory-browser-header code {
+  display: block;
+  overflow: hidden;
+  color: var(--color-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.directory-root-select select {
+  font-size: 12px;
+}
+.directory-search {
+  display: grid;
+  height: 42px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  color: var(--color-muted);
+  padding: 0 11px;
+}
+.directory-search:focus-within {
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue) 14%, transparent);
+}
+.directory-search input {
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 14px;
+}
+.directory-search button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-muted);
+}
+.directory-search button:hover {
+  background: var(--color-hover);
+}
+.directory-browser {
+  max-height: min(360px, 46dvh);
+  overflow-y: auto;
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: var(--color-canvas);
+  padding: 5px;
+}
+.directory-row {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-ink);
+  padding: 8px 10px;
+  text-align: left;
+}
+.directory-row:hover {
+  background: var(--color-hover);
+}
+.directory-row svg {
+  flex: none;
+  color: var(--color-blue);
+}
+.directory-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.directory-parent {
+  color: var(--color-muted);
+}
+.directory-parent svg {
+  color: var(--color-muted);
+}
+.directory-status {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+.project-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(160px, 1fr) auto;
+  align-items: end;
+  gap: 14px;
+}
+.path-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.path-entry .button-secondary {
+  border-radius: 11px;
+}
+.project-connect-button {
+  justify-content: center;
+}
+.spin {
+  animation: spin .8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 .button-primary,
 .button-secondary {
@@ -1079,6 +1215,16 @@ button:disabled {
   .hero-card .button-secondary {
     grid-column: 1/-1;
     justify-content: center;
+  }
+  .surface.project-connect {
+    padding: 17px;
+  }
+  .directory-browser-header,
+  .project-fields {
+    grid-template-columns: 1fr;
+  }
+  .project-connect-button {
+    min-height: 44px;
   }
   .chat-header {
     left: 0;

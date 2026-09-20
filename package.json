@@ -14,6 +14,7 @@
     "dev:gateway": "pnpm --filter @koan/gateway dev",
     "build": "pnpm --filter @koan/protocol check && pnpm --filter @koan/web build && pnpm --filter @koan/gateway check",
     "start": "node scripts/start.mjs",
+    "start:unrestricted": "node scripts/start.mjs --allow-all",
     "lint": "pnpm -r lint",
     "test": "node --test scripts/*.test.mjs && pnpm -r test",
     "test:e2e": "pnpm --filter @koan/web test:e2e",

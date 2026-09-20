@@ -17,6 +17,13 @@ type FetchOptions = Omit<RequestInit, "body"> & {
   body?: BodyInit | Record<string, unknown> | null;
 };
 
+export type DirectoryListing = {
+  path: string;
+  parent: string | null;
+  directories: Array<{ name: string; path: string }>;
+  truncated: boolean;
+};
+
 async function request<T>(
   path: string,
   options: FetchOptions = {},
@@ -80,7 +87,11 @@ export const api = {
     request<{ models: AgentModelOption[] }>(
       `/api/v1/agents/${agentId}/models?projectId=${encodeURIComponent(projectId)}`,
     ),
-  roots: () => request<{ roots: string[] }>("/api/v1/roots"),
+  roots: () => request<{ roots: string[]; defaultPath: string }>("/api/v1/roots"),
+  directories: (path: string) =>
+    request<DirectoryListing>(
+      `/api/v1/directories?path=${encodeURIComponent(path)}`,
+    ),
   projects: () => request<{ projects: Project[] }>("/api/v1/projects"),
   project: (id: string) =>
     request<{ project: Project; sessions: Session[] }>(

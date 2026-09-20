@@ -1,3 +1,4 @@
+import qrcode from "qrcode-terminal";
 import type { GatewayConfig } from "./config.ts";
 import type { Store } from "./db.ts";
 
@@ -17,6 +18,12 @@ export class PairingAuth {
 
   printCode() {
     console.log(`\n  KOAN pairing code: ${this.#code}\n  Expires in 10 minutes.\n`);
+    if (!this.config.publicUrl) return;
+
+    const pairingUrl = createPairingUrl(this.config.publicUrl, this.#code);
+    console.log("  Scan with a phone connected to your tailnet:\n");
+    qrcode.generate(pairingUrl, { small: true });
+    console.log(`  ${this.config.publicUrl}\n`);
   }
 
   newPairingCode() {
@@ -75,6 +82,12 @@ export class PairingAuth {
       else this.#attempts.set(key, { count: 1, resetAt: now + 60_000 });
     }
   }
+}
+
+export function createPairingUrl(publicUrl: string, code: string) {
+  const url = new URL("pair", publicUrl);
+  url.hash = new URLSearchParams({ code }).toString();
+  return url.toString();
 }
 
 export function pruneExpiredAttempts(

@@ -29,6 +29,10 @@ tailscale serve --bg localhost:18787
 
 Open the resulting `https://<machine>.<tailnet>.ts.net/` URL on the phone and enter the single-use 8-digit code printed by `pnpm start`. The cookie is Secure and therefore pairing through plain HTTP is intentionally unsupported in production.
 
+On later starts, KOAN detects that Tailscale Serve route and prints a QR code. Scan it from a phone connected to the same tailnet; the pairing page opens with the one-time code already filled in. Set `KOAN_PUBLIC_URL` in `.env.koan` if the public URL cannot be detected automatically.
+
+The normal `pnpm start` command never opens an interactive Deno permission prompt while the Gateway is running; access outside its configured permissions fails instead. To explicitly start the Gateway with every Deno permission granted, use `pnpm start:unrestricted`. This disables the Deno sandbox for the Gateway and expands the project picker to the filesystem root for that run. The picker still opens at the KOAN directory, from which you can move upward, browse sibling folders, and filter the current folder list. Hidden folders are not selectable.
+
 For local UI development, use `pnpm dev`; the development Gateway allows an insecure localhost cookie and Vite proxies `/api` and `/ws`.
 
 ## Architecture

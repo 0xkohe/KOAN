@@ -19,13 +19,13 @@ import { LiveProvider, useLive } from "../lib/live";
 export async function clientLoader() {
   const auth = await api.authStatus();
   if (!auth.paired) throw redirect("/pair");
-  const [{ projects }, { sessions }, { agents }, { roots }] = await Promise.all([
+  const [{ projects }, { sessions }, { agents }, { roots, defaultPath }] = await Promise.all([
     api.projects(),
     api.sessions(),
     api.agents(),
     api.roots(),
   ]);
-  return { auth, projects, sessions, agents, roots };
+  return { auth, projects, sessions, agents, roots, defaultPath };
 }
 
 export default function AppLayout() {
@@ -41,6 +41,7 @@ function Shell({ data }: { data: Awaited<ReturnType<typeof clientLoader>> }) {
   const { t } = useTranslation();
   const { connected, notices, dismissNotice, sessions } = useLive();
   const inSession = useMatch("/sessions/:sessionId");
+  const inProjects = useMatch("/projects/*");
   const [newOpen, setNewOpen] = useState(false);
   const links = [
     { to: href("/"), label: "Home", icon: Home, end: true },
@@ -104,7 +105,7 @@ function Shell({ data }: { data: Awaited<ReturnType<typeof clientLoader>> }) {
           </NavLink>
         ))}
       </nav>
-      {!inSession && (
+      {!inSession && !inProjects && (
         <button
           className="mobile-new"
           aria-label={t("newSession")}

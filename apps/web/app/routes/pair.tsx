@@ -14,7 +14,7 @@ export async function clientLoader() {
 export default function PairPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(() => pairingCodeFromHash(globalThis.location?.hash ?? ""));
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -29,6 +29,14 @@ export default function PairPage() {
       ),
     [],
   );
+  useEffect(() => {
+    if (!pairingCodeFromHash(window.location.hash)) return;
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${window.location.search}`,
+    );
+  }, []);
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setBusy(true);
@@ -94,4 +102,9 @@ export default function PairPage() {
       </section>
     </main>
   );
+}
+
+export function pairingCodeFromHash(hash: string) {
+  const value = new URLSearchParams(hash.replace(/^#/, "")).get("code") ?? "";
+  return value.replace(/\D/g, "").slice(0, 8);
 }

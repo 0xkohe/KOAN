@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { PairingAuth, pruneExpiredAttempts } from "../src/auth.ts";
+import { createPairingUrl, PairingAuth, pruneExpiredAttempts } from "../src/auth.ts";
 import type { GatewayConfig } from "../src/config.ts";
 import { Store } from "../src/db.ts";
 
@@ -12,6 +12,13 @@ Deno.test("pairing rate limits discard expired client buckets", () => {
   pruneExpiredAttempts(attempts, 100);
 
   assert.deepEqual([...attempts], [["active", { count: 2, resetAt: 101 }]]);
+});
+
+Deno.test("pairing QR URL keeps the one-time code in the fragment", () => {
+  assert.equal(
+    createPairingUrl("https://koan-machine.example.ts.net/", "12345678"),
+    "https://koan-machine.example.ts.net/pair#code=12345678",
+  );
 });
 
 Deno.test("pairing enforces every supplied rate-limit bucket", async () => {

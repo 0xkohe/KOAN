@@ -7,6 +7,7 @@ export type AppData = {
   sessions: Session[];
   agents: AgentState[];
   roots: string[];
+  defaultPath: string;
 };
 export function useAppData() {
   return useOutletContext<AppData>();

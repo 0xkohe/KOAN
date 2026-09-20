@@ -15,7 +15,7 @@ import type { PairingAuth } from "./auth.ts";
 import type { GatewayConfig } from "./config.ts";
 import type { Store } from "./db.ts";
 import type { Scheduler } from "./scheduler.ts";
-import { sameHostOrigin, validateProjectPath } from "./security.ts";
+import { listProjectDirectories, sameHostOrigin, validateProjectPath } from "./security.ts";
 
 type SocketState = { socket: WebSocket; deviceId: string; sessions: Set<string> };
 
@@ -157,7 +157,14 @@ export class GatewayServer {
       return json({ models: await this.agents.models(agentId.data, checked.path) });
     }
     if (path === "/api/v1/roots" && request.method === "GET") {
-      return json({ roots: this.config.allowedRoots });
+      return json({
+        roots: this.config.allowedRoots,
+        defaultPath: this.config.defaultProjectPath ?? this.config.allowedRoots[0] ?? "",
+      });
+    }
+    if (path === "/api/v1/directories" && request.method === "GET") {
+      const requestedPath = url.searchParams.get("path") ?? this.config.allowedRoots[0] ?? "";
+      return json(await listProjectDirectories(requestedPath, this.config.allowedRoots));
     }
 
     if (path === "/api/v1/projects" && request.method === "GET") {
