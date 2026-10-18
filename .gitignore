@@ -1,7 +1,16 @@
 node_modules/
 .pnpm-store/
 .koan/
-.env.koan
+.env
+.env.*
+!.env.koan.example
+.agents/
+.claude/
+.codex/
+.aws/
+.playwright/
+_ref/
+DESIGN.md
 apps/web/build/
 apps/web/dist/
 apps/web/.react-router/
@@ -10,3 +19,9 @@ playwright-report/
 test-results/
 *.log
 .DS_Store
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal

@@ -24,5 +24,18 @@
     "@types/node": "^24.3.0",
     "concurrently": "^9.2.1"
   },
-  "workspaces": ["apps/*", "packages/*"]
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "license": "MIT",
+  "description": "A self-hosted mobile workspace for local coding agents over Tailscale.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xkohe/KOAN.git"
+  },
+  "bugs": {
+    "url": "https://github.com/0xkohe/KOAN/issues"
+  },
+  "homepage": "https://github.com/0xkohe/KOAN#readme"
 }

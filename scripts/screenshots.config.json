@@ -1,0 +1,12 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "launchOptions": { "headless": true },
+    "contextOptions": {
+      "locale": "en-US",
+      "colorScheme": "light",
+      "deviceScaleFactor": 1,
+      "serviceWorkers": "block"
+    }
+  }
+}
