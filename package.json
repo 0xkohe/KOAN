@@ -21,8 +21,8 @@
     "test:agents": "KOAN_AGENT_SMOKE=1 deno test --allow-run --allow-env apps/gateway/tests/agent_smoke_test.ts"
   },
   "devDependencies": {
-    "@types/node": "^24.3.0",
-    "concurrently": "^9.2.1"
+    "@types/node": "^26.6.5",
+    "concurrently": "^10.0.6"
   },
   "workspaces": [
     "apps/*",

@@ -10,7 +10,7 @@
     "test": "deno test --allow-read --allow-write --allow-run --allow-env --allow-sys=homedir tests"
   },
   "devDependencies": {
-    "@types/node": "^24.3.0",
+    "@types/node": "^26.6.5",
     "@types/qrcode-terminal": "^0.12.2"
   },
   "dependencies": {
