@@ -33,3 +33,11 @@ jobs:
       - run: pnpm build
       - run: pnpm --filter @koan/web exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+      - name: Save browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-test-results
+          path: apps/web/test-results/
+          if-no-files-found: ignore
+          retention-days: 7

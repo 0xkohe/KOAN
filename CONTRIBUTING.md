@@ -32,6 +32,8 @@ pnpm test:e2e
 ```
 
 The test suite uses fake agent processes and does not require provider credentials.
+Browser tests use their own port (4175). CI runs them against the production build;
+to reproduce that path locally, run `pnpm build` followed by `CI=1 pnpm test:e2e`.
 `pnpm test:agents` is an optional, separate check of locally installed CLI versions.
 It does not validate an authenticated conversation with every provider.
 
