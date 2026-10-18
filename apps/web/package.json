@@ -14,7 +14,7 @@
   "dependencies": {
     "@koan/protocol": "workspace:*",
     "@react-router/fs-routes": "^8.3.0",
-    "i18next": "^25.6.0",
+    "i18next": "^26.4.6",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
